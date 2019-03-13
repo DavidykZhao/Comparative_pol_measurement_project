@@ -143,10 +143,53 @@ additional_wv5 = dat %>%
 
 ###################################Selecting country
 
-polity_1to5 = polity %>%
-  filter(year == 2017 & democ <1) %>%
+polity_6up = polity %>%
+  filter(year == 2017 & democ >=6) %>%
   select(country, year, democ)
 
-intersect(polity_1to5$country,country_vector)
+country_6up = intersect(polity_6up$country,country_vector)
+country_6up_censored = country_6up[-c(3, 5, 17, 19, 25,26,27,28, 31)]
 
 
+data_wv5_6up = data_wv5 %>%
+  filter(country %in% country_6up_censored)
+head(data_wv5_6up)
+
+#########figure out the percentage of unnormal values
+apply(data_wv5_6up[-1], 2, table)
+
+tst = data_wv5_6up %>%
+  group_by(country) %>%
+  select(V153) %>%
+  table()
+
+for (i in 1:nrow(tst)) {
+  print(prop.table(table(tst[i,])))
+}
+
+rowSums(round(prop.table(tst, 1),3)[,1:3])
+sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE)
+
+
+############ exploratory about how manu entries left if delete all of nonnormals
+## original size 
+d = c()
+for (cn in c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia")){
+  a = data_wv5_6up %>%
+    filter(country == cn) %>%
+    nrow()
+  d = c(d, a)
+}
+d
+
+## filtered size
+b = c()
+for (cn in c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia")){
+  a = data_wv5_6up %>%
+    filter(country == cn) %>%
+    filter(V152>0 & V153>0 & V154>0 & V155 >0 & V156 >0 & V157 >0 & V161>0) %>%
+    nrow()
+  b = c(b,a)
+}
+b
+b/d

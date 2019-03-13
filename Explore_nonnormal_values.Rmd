@@ -1,0 +1,163 @@
+---
+title: "MI part markdown"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Countries that got deleted from the list at the first glance
+Please let me know if any of these countries is needed so I can add them back
+
+```{r, echo=FALSE}
+country_6up = intersect(polity_6up$country,country_vector)
+country_6up[c(3, 5, 17, 19, 25,26,27,28, 31)]
+
+```
+
+## Plots of distributions of answers by country
+> Mainly to inspect the distribution of nonnormal values (-5, -2, -1)
+> Especially, -2: No answer and -1:Dont know are pretty prevalent in some countries.
+
+This is the density plot for the V152 "tax the rich," **Colombia** has ALL of answers as -4 "Not asked." Thus it has been dropped as well. 
+After deleting Colombia, **Georgia** has 14.4& of nonnormal values
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+g <- ggplot(data_wv5_6up, aes(V152))+
+  geom_density(aes(fill=factor(country)), alpha=0.3) + 
+  scale_fill_manual(values = getPalette) +
+  labs(title="Density plot of V152", 
+       subtitle="Government taxes rich to subsidize poor",
+       caption="Source: World Value Survey Wave 5",
+       x="Agreement level",
+       fill="Country")
+ 
+print(g)
+print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
+
+```
+
+**Bulgaria** and **Georgia** both have more than 20% of -1:"dont know"s; **Japan** has about 20% of -2:"No answer"
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+g <- ggplot(data_wv5_6up, aes(V153))+
+  geom_density(aes(fill=factor(country)), alpha=0.3) + 
+  scale_fill_manual(values = getPalette) +
+  labs(title="Density plot of V153", 
+       subtitle="Religious authorities interpret laws",
+       caption="Source: World Value Survey Wave 5",
+       x="Agreement level",
+       fill="Country")
+print(g)
+print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
+
+```
+V154 seems okay: the highest nonnormal peaks are **Japan** with only 9.8% and **Serbia** with 9.4%
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+g <- ggplot(data_wv5_6up, aes(V154))+
+  geom_density(aes(fill=factor(country)), alpha=0.3) + 
+  scale_fill_manual(values = getPalette) +
+  labs(title="Density plot of V154", 
+       subtitle="People choose leaders in free elections ",
+       caption="Source: World Value Survey Wave 5",
+       x="Agreement level",
+       fill="Country")
+print(g)
+print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
+```
+V155 seems okay with **Argentina** 11.1% as nonnormal values and **Japan** 10.9% with nonnormal values
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+g <- ggplot(data_wv5_6up, aes(V155))+
+  geom_density(aes(fill=factor(country)), alpha=0.3) + 
+  scale_fill_manual(values = getPalette) +
+  labs(title="Density plot of V155", 
+       subtitle="People receive state aid for unemployment",
+       caption="Source: World Value Survey Wave 5",
+       x="Agreement level",
+       fill="Country")
+print(g)
+print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
+```
+In terms of V156, there are some countries with lots of -1 pr -2s. **Bulgaria** has 18.7%, **Georgia** 18.4%, **Serbia** 16.4% etc...
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+g <- ggplot(data_wv5_6up, aes(V156))+
+  geom_density(aes(fill=factor(country)), alpha=0.3) + 
+  scale_fill_manual(values = getPalette) +
+  labs(title="Density plot of V156", 
+       subtitle="Army takes over when government is incompetent  ",
+       caption="Source: World Value Survey Wave 5",
+       x="Agreement level",
+       fill="Country")
+print(g)
+print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
+```
+"\n"
+For V157, **Japan**, **Bulgaria**, **Serbia** have some unnormal values
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+g <- ggplot(data_wv5_6up, aes(V157))+
+  geom_density(aes(fill=factor(country)), alpha=0.3) + 
+  scale_fill_manual(values = getPalette) +
+  labs(title="Density plot of V157", 
+       subtitle="Civil rights protect liberties from oppression",
+       caption="Source: World Value Survey Wave 5",
+       x="Agreement level",
+       fill="Country")
+print(g)
+print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
+```
+The V161 seems okay with **Serbia** 9.9% and **Japan** 8.8
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+g <- ggplot(data_wv5_6up, aes(V161))+
+  geom_density(aes(fill=factor(country)), alpha=0.3) + 
+  scale_fill_manual(values = getPalette) +
+  labs(title="Density plot of V161", 
+       subtitle="Women have same rights as men ",
+       caption="Source: World Value Survey Wave 5",
+       x="Agreement level",
+       fill="Country")
+print(g)
+print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
+```
+
+
+For the purpose of exploratory analysis, I deleted entries with at least one answer being unnormal (<0), in those troublemaking countries: "Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia." The percentage of the normal entries that are left are such percentage:
+
+```{r}
+## original size 
+d = c()
+for (cn in c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia")){
+  a = data_wv5_6up %>%
+    filter(country == cn) %>%
+    nrow()
+  d = c(d, a)
+}
+
+print(paste("The originial size for", c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia"), "are:", d))
+
+## filtered size
+b = c()
+for (cn in c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia")){
+  a = data_wv5_6up %>%
+    filter(country == cn) %>%
+    filter(V152>0 & V153>0 & V154>0 & V155 >0 & V156 >0 & V157 >0 & V161>0) %>%
+    nrow()
+  b = c(b,a)
+}
+
+print(paste("After DELETION of nonnormal entries, the size for", c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia"), "are:", b))
+
+
+### The percentage of the normal entries for countries: "Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia"
+
+print(paste("The percentage of the normal entries that are left for", c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia"), "are:", b/d))
+```
+
+In sum, the main issue we need to deal with are those -2 and -1's. Should we just simply impute them to a midpoint or we want to impute them based on other variables...
+
+The troublemakers are mainly Japan, Bulgaria, Serbia, Georgia Slovenia etc... which are mostly eastern Europe or Asia countries. They usually have above 10% of nonnormal values in at least one of the items. 
+
+
+
+
+
+rmarkdown::render("markdown2.Rmd")
