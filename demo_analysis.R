@@ -2,7 +2,7 @@ library(tidyverse)
 install.packages("labelled")
 library("labelled")
 
-dat <- readRDS("wv5.rds")
+dat <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv5.rds")
 unique(dat["V2"])
 
 polity = readxl::read_xls("polity_2017.xls")
@@ -38,31 +38,32 @@ head(data_wv5["V152"])
 labels(tst)
 stack(attr(data_wv5$V152, 'labels'))
 
-ggplot(data_wv5, aes(V152))+
-  geom_bar()
+# ggplot(data_wv5, aes(V152))+
+#   geom_bar()
 
 
 apply(data_wv5[, -1], 2, show_bar)
 ################ Reading in wv6 data ######################
-dat6 <- readRDS("wv6.rds")
-table(dat6$V2A)
-country_name
-country_code_6 = readxl::read_xlsx("country_code_6.xlsx", col_names = TRUE)
-colnames(country_code_6) = c("code", "country")
-country_vector_6 <- setNames(country_code_6$country, country_code_6$code)
-country_w_wv6 = intersect(country_name,country_vector_6)
-dat6$country = country_vector_6[as.character(dat6$V2A)]
-table(dat6$country)
-country_two_waves = intersect(country_w_wv6, country_w_wv5)
-demo_v6 = c("country", "V131", "V132", "V133", "V134", "V135",
-            "V136", "V139")
-data_wv6 = dat6 %>%
-  select(demo_v6)
+# Command+shift+c
+# dat6 <- readRDS("wv6.rds")
+# table(dat6$V2A)
+# country_name
+# country_code_6 = readxl::read_xlsx("country_code_6.xlsx", col_names = TRUE)
+# colnames(country_code_6) = c("code", "country")
+# country_vector_6 <- setNames(country_code_6$country, country_code_6$code)
+# country_w_wv6 = intersect(country_name,country_vector_6)
+# dat6$country = country_vector_6[as.character(dat6$V2A)]
+# table(dat6$country)
+# country_two_waves = intersect(country_w_wv6, country_w_wv5)
+# demo_v6 = c("country", "V131", "V132", "V133", "V134", "V135",
+#             "V136", "V139")
+# data_wv6 = dat6 %>%
+#   select(demo_v6)
 ########################how many unnormal entries are there
-for (i in c(2:8)) {
-  print(paste("No.", i, "var has the unnormal persentage of", 
-              mean((data_wv6[,i]) < 0)))
-}
+# for (i in c(2:8)) {
+#   print(paste("No.", i, "var has the unnormal persentage of", 
+#               mean((data_wv6[,i]) < 0)))
+# }
 
 ################### inpute the abnormal value into 5
 data_wv6_inputed = data_wv6
@@ -94,17 +95,18 @@ b = alpha_by_country("Australia")
 
 
 country_list = unique(data_wv6$country)[-8] #there is a NA tag at the 8th location
-alpha_country_wv6= c()
-for (i in 1:length(country_list)) {
-  alpha_country_wv6[i] = alpha_by_country(country_list[i])
-}
+# alpha_country_wv6= c()
+# for (i in 1:length(country_list)) {
+#   alpha_country_wv6[i] = alpha_by_country(country_list[i])
+# }
 
-alpha_country_twowaves_wv6 = c()
-for (i in 1:length(country_two_waves)) {
-  alpha_country_twowaves_wv6[i] = alpha_by_country(country_two_waves[i])
-}
-alpha_country_twowaves_wv6
+# alpha_country_twowaves_wv6 = c()
+# for (i in 1:length(country_two_waves)) {
+#   alpha_country_twowaves_wv6[i] = alpha_by_country(country_two_waves[i])
+# }
+# alpha_country_twowaves_wv6
 
+################################################
 #######ploting distribution of items by countries 
 country_censored = country_w_wv5[-c(3, 17, 25)]
 useful_wv5 <- data_wv5 %>%
@@ -133,12 +135,18 @@ ggplot(useful_wv5, aes(x=factor(country), y=V152)) +
         text = element_text(size=20),
         plot.margin = unit(c(3,3,3,2), "cm"))
 dev.off()
-##################################
+#########################################################################
 
 additional_wv5 = dat %>%
   filter(country %in% country_censored) %>%
   select(country, V148, V150, V151, V162, V163)
 
+###################################Selecting country
 
+polity_1to5 = polity %>%
+  filter(year == 2017 & democ <1) %>%
+  select(country, year, democ)
+
+intersect(polity_1to5$country,country_vector)
 
 
