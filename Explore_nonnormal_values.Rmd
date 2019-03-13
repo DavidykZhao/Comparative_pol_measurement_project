@@ -91,7 +91,7 @@ g <- ggplot(data_wv5_6up, aes(V156))+
 print(g)
 print(sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE))
 ```
-"\n"
+
 For V157, **Japan**, **Bulgaria**, **Serbia** have some unnormal values
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 g <- ggplot(data_wv5_6up, aes(V157))+
@@ -152,12 +152,26 @@ print(paste("After DELETION of nonnormal entries, the size for", c("Georgia", "J
 print(paste("The percentage of the normal entries that are left for", c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia"), "are:", b/d))
 ```
 
-In sum, the main issue we need to deal with are those -2 and -1's. Should we just simply impute them to a midpoint or we want to impute them based on other variables...
+Surprisingly, there are lots of entries which all the answers are negative, for example in **Japan**
+
+```{r}
+Japan %>%
+  filter(V152 < 0)
+```
+and **Bulgaria**
+```{r}
+data_wv5_6up %>%
+  filter(country == "Bulgaria") %>%
+  filter(V152 <0)
+```
+
 
 The troublemakers are mainly Japan, Bulgaria, Serbia, Georgia Slovenia etc... which are mostly eastern Europe or Asia countries. They usually have above 10% of nonnormal values in at least one of the items. 
 
+The main issue we need to deal with are those -2 and -1's. Because there are many entries that are populated with not only one negaties, I think we might want to delete them at all.
 
 
 
 
-rmarkdown::render("markdown2.Rmd")
+
+rmarkdown::render("Explore_nonnormal_values.Rmd")
