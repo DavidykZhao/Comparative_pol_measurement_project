@@ -193,3 +193,12 @@ for (cn in c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia")){
 }
 b
 b/d
+
+
+head(Japan)
+Japan %>%
+  filter(V152 < 0 & V153 >0 )
+
+data_wv5_6up %>%
+  filter(country == "Bulgaria") %>%
+  filter(V152 <0)

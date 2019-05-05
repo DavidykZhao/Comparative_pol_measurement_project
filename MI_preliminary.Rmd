@@ -1,0 +1,36 @@
+---
+title: "MI_preliminary"
+output: html_document
+---
+
+
+The countries in the list
+```{r, echo=FALSE}
+table(data_wv5_6up$country)
+```
+
+Percentage left if delete all of the entries with any negative values
+```{r, echo=FALSE}
+(table(nonnegtive$country))/(table(data_wv5_6up$country))
+```
+
+```{r, echo=FALSE}
+nonnegtive_reversed = nonnegtive
+#table(nonnegtive$V153)
+nonnegtive_reversed$V153 = 11 - nonnegtive$V153
+#table(nonnegtive_reversed$V153)
+
+#table(nonnegtive$V156)
+nonnegtive_reversed$V156 = 11 - nonnegtive$V156
+
+get_index = function(fit) {
+  round(fitMeasures(fit)[c(3,4,5,17,27,42,50)], 3)
+}
+
+model_1 <-'
+demo =~ V152 + V153 + V154 + V155 + V156 + V157 + V161
+'
+(measurementInvariance(model_1, data = nonnegtive_reversed, group = "country"))
+
+```
+rmarkdown::render("MI_preliminary.Rmd")
