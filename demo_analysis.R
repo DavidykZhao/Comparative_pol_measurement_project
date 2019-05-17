@@ -3,21 +3,20 @@ install.packages("labelled")
 library("labelled")
 
 dat <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv5.rds")
-unique(dat["V2"])
 
 polity = readxl::read_xls("polity_2017.xls")
-summary(polity)
-polity_7up = polity %>%
-  filter(year == 2017 & democ >=7) %>%
+
+polity_6up = polity %>%
+  filter(year == 2017 & democ >=6) %>%
   select(country, year, democ)
-country_name = polity_7up$country # select the atomic column using $ rather than []
+
+country_name = polity_6up$country # select the atomic column using $ rather than []
 intersect(country_name,country_vector)
 #### read in country_code
 country_code = readxl::read_xlsx("country_code_5.xlsx", col_names = F)
 colnames(country_code) = c("code", "country")
 country_vector <- setNames(country_code$country, country_code$code)
 country_w_wv5 = intersect(country_name,country_vector)
-country_vector
 dat$country = country_vector[as.character(dat$V2A)]
 table(dat$country)
 
@@ -52,7 +51,7 @@ apply(data_wv5[, -1], 2, show_bar)
 # colnames(country_code_6) = c("code", "country")
 # country_vector_6 <- setNames(country_code_6$country, country_code_6$code)
 # country_w_wv6 = intersect(country_name,country_vector_6)
-# dat6$country = country_vector_6[as.character(dat6$V2A)]
+# dat$country = country_vector_6[as.character(dat6$V2A)]
 # table(dat6$country)
 # country_two_waves = intersect(country_w_wv6, country_w_wv5)
 # demo_v6 = c("country", "V131", "V132", "V133", "V134", "V135",
@@ -66,15 +65,15 @@ apply(data_wv5[, -1], 2, show_bar)
 # }
 
 ################### inpute the abnormal value into 5
-data_wv6_inputed = data_wv6
-data_wv6_inputed$V131[data_wv6$V131<0] = 5
-for (i in c(2:8)){
-  data_wv6_inputed[, i][data_wv6_inputed[, i] <0] = 5
-  print("finished inputing for var", i)
-}
-#******** inputing for wv5
-data_wv5_inputed = data_wv5
-data_wv5_inputed$V152[data_wv5$V152<0] = 5
+# data_wv6_inputed = data_wv6
+# data_wv6_inputed$V131[data_wv6$V131<0] = 5
+# for (i in c(2:8)){
+#   data_wv6_inputed[, i][data_wv6_inputed[, i] <0] = 5
+#   print("finished inputing for var", i)
+# }
+# #******** inputing for wv5
+# data_wv5_inputed = data_wv5
+# data_wv5_inputed$V152[data_wv5$V152<0] = 5
 
 # for (i in c(2:8)){
 #   data_wv6_inputed[, i][data_wv6_inputed[, i] <0] = 5
@@ -82,19 +81,19 @@ data_wv5_inputed$V152[data_wv5$V152<0] = 5
 # }
 
 #### start modeling on data_wv6_inputed
-library(psych)
-alpha_by_country = function(x) {
-    aaa = data_wv6_inputed %>%
-    filter(country == x) %>%
-    select(V131, V132, V133, V134, V135, V136, V139) %>%
-    psych::alpha()
-  return(paste("the raw alpha for", x, "is", aaa$total[1]))
-}
-
-b = alpha_by_country("Australia")
-
-
-country_list = unique(data_wv6$country)[-8] #there is a NA tag at the 8th location
+# library(psych)
+# alpha_by_country = function(x) {
+#     aaa = data_wv6_inputed %>%
+#     filter(country == x) %>%
+#     select(V131, V132, V133, V134, V135, V136, V139) %>%
+#     psych::alpha()
+#   return(paste("the raw alpha for", x, "is", aaa$total[1]))
+# }
+# 
+# b = alpha_by_country("Australia")
+# 
+# 
+# country_list = unique(data_wv6$country)[-8] #there is a NA tag at the 8th location
 # alpha_country_wv6= c()
 # for (i in 1:length(country_list)) {
 #   alpha_country_wv6[i] = alpha_by_country(country_list[i])
@@ -171,7 +170,9 @@ rowSums(round(prop.table(tst, 1),3)[,1:3])
 sort(rowSums(round(prop.table(tst, 1),3)[,1:3]), TRUE)
 
 
-############ exploratory about how manu entries left if delete all of nonnormals
+
+
+############ exploratory about how many entries left if delete all of nonnormals
 ## original size 
 d = c()
 for (cn in c("Georgia", "Japan", "Bulgaria", "Serbia", "Slovenia")){
