@@ -1,0 +1,85 @@
+---
+title: "LCA_preliminary"
+output:
+  html_document
+---
+
+
+##Australia LCA
+Below shows: 
+
+1. Best model item response probability
+2. 3D plot of class-conditional item response probs
+
+```{r}
+
+min_bic <- 100000
+for(i in 2:7){
+  lc <- poLCA(f, AUS, nclass=i, maxiter=3000, 
+              tol=1e-5, na.rm=FALSE,  
+              nrep=10, verbose=TRUE, calc.se=TRUE)
+  if(lc$bic < min_bic){
+    min_bic <- lc$bic
+    LCA_best_model<-lc
+  }
+} 
+
+
+```
+
+```{r}
+print(LCA_best_model)
+```
+```{r}
+plot(LCA_best_model)
+```
+
+----------------------------------------------------------------------
+##For the Sweden data
+Below shows: 
+
+1. Best model item response probability
+2. 3D plot of class-conditional item response probs
+
+  
+```{r}
+min_bic <- 100000
+for(i in 2:7){
+  lc <- poLCA(f, SWEDEN, nclass=i, maxiter=3000, 
+              tol=1e-5, na.rm=FALSE,  
+              nrep=10, verbose=TRUE, calc.se=TRUE)
+  if(lc$bic < min_bic){
+    min_bic <- lc$bic
+    LCA_best_model<- lc
+  }
+} 
+```
+
+```{r}
+LCA_best_model
+
+```
+
+```{r}
+plot(LCA_best_model)
+```
+
+
+#Profile plot for US data (3-classes)
+```{r}
+
+plot = ggplot(profile_long, aes(x = variable, y = value, group = class, color = class)) +
+  geom_point(size = 2.25)+
+  geom_line(size = 1.25) +
+  labs(x = NULL, y = "Mean value of the response", main = "Profile plot") +
+  theme_bw(base_size = 14)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "top")
+p = ggplotly(plot, tooltip = "all") %>%
+  layout(legend = list(orientation = "h", y = 1.2))
+print(p)
+
+```
+
+library(rmarkdown)
+rmarkdown::render("LCA_preliminary.Rmd")
+
