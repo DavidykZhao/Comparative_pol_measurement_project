@@ -1,0 +1,10 @@
+name: shiny_app
+title:
+username:
+account: yikai-zhao
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 938160
+bundleId: 2095749
+url: https://yikai-zhao.shinyapps.io/shiny_app/
+when: 1558335547.61177
