@@ -1,13 +1,13 @@
 profile_plot = function(data){
   f = with(data, cbind(tax, religion, free_election, state_aid, civil_rights, women)~1) 
-  min_bic <- 100000
+  min_bic <- 1000000
   for(i in 1:7){
     lc <- poLCA(f, data, nclass=i, maxiter=3000, 
                 tol=1e-5, na.rm=FALSE,  
                 nrep=10, verbose=TRUE, calc.se=TRUE)
     if(lc$bic < min_bic){
       min_bic <- lc$bic
-      LCA_best_model<-lc
+      LCA_best_model <- lc
     }
   }    	
   

@@ -1,0 +1,268 @@
+---
+title: "EPSA_presentation_plots"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+## Including Plots
+
+
+```{r pressure, include = FALSE, echo=FALSE}
+library("poLCA")
+library("reshape2")
+nonnegtive = read.csv("nonzero_dataset.csv")
+
+lb <- function(x) mean(x) - sd(x)
+ub <- function(x) mean(x) + sd(x)
+
+
+raincloud_theme <- theme(
+  text = element_text(size = 10),
+  axis.title.x = element_text(size = 16),
+  axis.title.y = element_text(size = 16),
+  axis.text = element_text(size = 14),
+  axis.text.x = element_text(angle = 45, vjust = 0.5),
+  legend.title = element_text(size = 16),
+  legend.text = element_text(size = 16),
+  legend.position = "right",
+  plot.title = element_text(lineheight = .8, face = "bold", size = 16),
+  panel.border = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.grid.major = element_blank(),
+  axis.line.x = element_line(colour = "black", size = 0.5, linetype = "solid"),
+  axis.line.y = element_line(colour = "black", size = 0.5, linetype = "solid"))
+
+#mypalette = RColorBrewer::brewer.pal(26,"Spectral") not working
+getPalette = colorRampPalette(RColorBrewer::brewer.pal(8, "Set2"))(26)
+
+```
+
+```{r, include=FALSE}
+country_list = c("United States", "United Kingdom", "Japan", 
+                 "Sweden", "Brazil", "Serbia")
+selected_nonneg = nonnegtive %>%
+  dplyr::filter(country %in% country_list)
+
+
+colnames(selected_nonneg)
+table(selected_nonneg$country)
+dim(selected_nonneg)
+dim(nonnegtive)
+```
+
+The dataset for the 6 selected countries has 6101 data entries.
+
+```{r, include=FALSE}
+sumld <- selected_nonneg %>% 
+  dplyr::select(country, tax) %>% 
+  group_by(country) %>% 
+  summarise_all(funs(mean, median, lower = lb, upper = ub))
+sumld
+```
+
+
+
+```{r, echo=FALSE, warning=FALSE, include=FALSE}
+
+source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
+
+g <- 
+  ggplot(data = selected_nonneg, 
+         aes(x = factor(country), y = tax, fill = factor(country))) +
+  geom_flat_violin(position = position_nudge(x = .2, y = 0), alpha = .8) +
+  geom_point(aes(y = tax, color = factor(country)), 
+             position = position_jitter(width = .15), size = .5, alpha = 0.8) +
+  geom_boxplot(width = .1, outlier.shape = NA, alpha = 0.5) +
+  geom_point(data = sumld, aes(x = factor(country), y = mean), 
+             position = position_nudge(x = 0.3), size = 2.5) +
+  geom_errorbar(data = sumld, aes(ymin = lower, ymax = upper, y = mean), 
+                position = position_nudge(x = 0.3), width = 0)+
+  expand_limits(x = 5.25) +
+  guides(fill = FALSE) +
+  guides(color = FALSE) +
+  scale_color_manual(values = getPalette) +
+  scale_fill_manual(values = getPalette) +
+  #coord_flip() + # flip or not
+  theme_bw() +
+  raincloud_theme +
+  theme(axis.title = element_text(size = 12),
+        axis.text=element_text(size=15),
+        axis.title.x = element_blank())
+
+# png(filename="tax.png", width = 1000, height = 760)
+# g
+# dev.off()
+
+
+g
+```
+
+## First step is to generate distribution plots for those countries
+
+```{r, echo=FALSE, warning= FALSE}
+library(tidyverse)
+var_names = colnames(selected_nonneg)[-1]
+for (i in seq_along(var_names)){
+  
+  sumld <- selected_nonneg %>% 
+  dplyr::select(country, var_names[i]) %>% 
+  group_by(country) %>% 
+  summarise_all(funs(mean, median, lower = lb, upper = ub))
+  
+  
+  g = ggplot(data = selected_nonneg, 
+         aes(x = factor(country), y = selected_nonneg[, i+1], fill = factor(country))) +
+  geom_flat_violin(position = position_nudge(x = .2, y = 0), alpha = .8) +
+  geom_point(aes(y = selected_nonneg[, i+1], color = factor(country)), 
+             position = position_jitter(width = .15), size = .5, alpha = 0.8) +
+  geom_boxplot(width = .1, outlier.shape = NA, alpha = 0.5) +
+  geom_point(data = sumld, aes(x = factor(country), y = mean), 
+             position = position_nudge(x = 0.3), size = 2.5) +
+  geom_errorbar(data = sumld, aes(ymin = lower, ymax = upper, y = mean), 
+                position = position_nudge(x = 0.3), width = 0)+
+  expand_limits(x = 5.25) +
+  guides(fill = FALSE) +
+  guides(color = FALSE) +
+  scale_color_manual(values = getPalette) +
+  scale_fill_manual(values = getPalette) +
+  labs(y = paste(var_names[i]))+
+  labs(title= paste("Distribution of the ", var_names[i], " variable" ))+
+  #coord_flip() + # flip or not
+  theme_bw() +
+  raincloud_theme +
+  theme(axis.title = element_text(size = 12),
+        axis.text=element_text(size=15),
+        axis.title.x = element_blank())
+  
+  print(g)
+  
+  png(filename= paste(var_names[i], ".png"), width = 650, height = 400)
+  print(g)
+  dev.off()
+}
+
+
+```
+
+##Next step is to generate profile plots side by side for those countries
+
+```{r, include=FALSE}
+
+profile_plot = function(data){
+  f = with(data, cbind(tax, religion, free_election, state_aid, civil_rights, women)~1) 
+  min_bic <- 1000000
+  for(i in 2:5){
+    lc <- poLCA(f, data, nclass=i, maxiter=3000, 
+                tol=1e-5, na.rm=FALSE,  
+                nrep=10, verbose=TRUE, calc.se=TRUE)
+    if(lc$bic < min_bic){
+      min_bic <- lc$bic
+      LCA_best_model <- lc
+    }
+  }    	
+  
+  probs = LCA_best_model$probs
+  n_class = length(LCA_best_model$P)
+  
+  profile_tb = data.frame(
+    tax = replicate(n_class, NA),
+    religion = replicate(n_class, NA),
+    free_election = replicate(n_class, NA),
+    state_aid = replicate(n_class, NA),
+    civil_rights = replicate(n_class, NA),
+    women = replicate(n_class, NA))
+  
+  for (i in 1:6) {
+    if (length(probs[[i]][1,]) < 10) {
+      probs[[i]] = cbind(probs[[i]], matrix(0, nrow = nrow(probs[[i]]), ncol = 10 - ncol(probs[[i]]))) 
+    } 
+    profile_tb[, i] = probs[[i]] %*% 1:10
+  }
+  
+  rownames(profile_tb) = paste(rep("class", n_class), seq(1, n_class, 1), sep = "_")
+  profile_tb = rownames_to_column(profile_tb)
+  colnames(profile_tb)[1] = "class"
+  profile_long = reshape::melt(profile_tb, id.vars = "class")
+  
+  p = ggplot(profile_long, aes(x = variable, y = value, group = class, color = class)) +
+    geom_point(size = 2.25, aes(shape = class))+
+    geom_line(size = 1.00) +
+    labs(x = NULL, y = "Mean value of the response") +
+    theme_bw(base_size = 14)+
+    ggtitle(paste(paste("class", 1:length(LCA_best_model$P), sep = "_"),  
+                  round(LCA_best_model$P, 3), collapse = ", "))+
+    theme(plot.margin=unit(c(1.5,1.5,1.5,1.2),"cm"))+
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 13))+
+    theme(plot.title = element_text(hjust = 0.5, size = 10))+
+    theme(legend.position = "none")+
+    theme(axis.title.y = element_blank())
+  print(p)
+  return(p)
+  
+  # library(plotly)
+  # 
+  # plotly_p = ggplotly(p, tooltip = "all") %>%
+  #   layout(legend = list(orientation = "h", y = 1.2))
+  # print(plotly_p)
+  # return(plotly_p)
+}
+
+gen_country = function(country_name){
+    a = selected_nonneg %>%
+    filter(country == country_name) %>%
+    dplyr::select(c("tax", "religion", "free_election", "state_aid",
+                    "civil_rights", "women"))
+  return(a)
+}
+```
+
+```{r, include = FALSE}
+country_names_6 = unique(selected_nonneg$country)
+gs = vector("list", length(country_names_6))
+
+for (i in seq_along(country_names_6)){
+  
+  gs[[i]] = profile_plot(gen_country(country_names_6[i]))
+  
+}
+
+```
+```{r, warning=FALSE, include = FALSE}
+#install.packages("multipanelfigure")
+#install.packages("stringr", type="source")
+# library(multipanelfigure)
+# 
+# figure1 <- multi_panel_figure(columns = 2, rows = 2, width = 1200, height = 1200, panel_label_type = "none")
+# 
+# figure1 %<>%
+#   fill_panel(gs[[1]], column = 1, row = 1) %<>%
+#   fill_panel(gs[[2]], column = 2, row = 1) %<>%
+#   fill_panel(gs[[3]], column = 1, row = 2) %<>%
+#   fill_panel(gs[[4]], column = 2, row = 2) 
+#   #%<>%
+#   # fill_panel(gs[[5]], column = 1, row = 3) %<>%
+#   # fill_panel(gs[[6]], column = 2, row = 3)
+# print(figure1)
+
+
+# library(cowplot)
+# cowplot::plot_grid(gs[[1]], gs[[2]],gs[[3]], gs[[4]])
+
+library(gridExtra)
+grid.arrange(gs[[1]], gs[[2]],
+             gs[[3]], gs[[4]], nrow = 2)
+
+
+```
+

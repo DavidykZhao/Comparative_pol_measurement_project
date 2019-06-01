@@ -27,8 +27,11 @@ nonnegtive = dat %>%
   filter(country %in% country_6up_censored) %>%
   filter_all(all_vars(. > 0)) 
 
-
-
+nonnegtive[,2:length(nonnegtive)] <- lapply(nonnegtive[,2:length(nonnegtive)], factor)
+colnames(nonnegtive) = c("country", "tax", "religion", "free_election", "state_aid",
+                         "civil_rights", "women")
+#### Export csv
+write.csv(nonnegtive, "nonzero_dataset.csv", row.names = FALSE)
 
 
 

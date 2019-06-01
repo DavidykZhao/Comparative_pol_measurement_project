@@ -2,11 +2,30 @@ install.packages("poLCA")
 library("poLCA")
 library("reshape2")
 
-
+nonnegtive = read.csv("nonzero_dataset.csv")
 ### turn columns into factor type
 nonnegtive[,2:length(nonnegtive)] <- lapply(nonnegtive[,2:length(nonnegtive)], factor)
 colnames(nonnegtive) = c("country", "tax", "religion", "free_election", "state_aid",
                          "civil_rights", "women")
+
+
+############ Recode 10-scale to 3-level
+
+recode = function(df){
+  for (i in df){
+    cut(i,
+        breaks=c(0, 4, 5, 10),
+        labels=c())
+  }
+  return(df)
+}
+
+df_3level = recode(nonnegtive)
+
+#for (i in nonnegtive) print(summary(i))
+
+
+############
 
 AUS = nonnegtive %>%
   filter(country == "Australia") %>%
