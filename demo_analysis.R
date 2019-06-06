@@ -8,7 +8,7 @@ polity = readxl::read_xls("polity_2017.xls")
 
 polity_6up = polity %>%
   filter(year == 2017 & democ >=6) %>%
-  select(country, year, democ)
+  dplyr::select(country, year, democ)
 
 country_name = polity_6up$country # select the atomic column using $ rather than []
 intersect(country_name,country_vector)
@@ -43,21 +43,20 @@ stack(attr(data_wv5$V152, 'labels'))
 
 apply(data_wv5[, -1], 2, show_bar)
 ################ Reading in wv6 data ######################
-# Command+shift+c
-# dat6 <- readRDS("wv6.rds")
-# table(dat6$V2A)
-# country_name
-# country_code_6 = readxl::read_xlsx("country_code_6.xlsx", col_names = TRUE)
-# colnames(country_code_6) = c("code", "country")
-# country_vector_6 <- setNames(country_code_6$country, country_code_6$code)
-# country_w_wv6 = intersect(country_name,country_vector_6)
-# dat$country = country_vector_6[as.character(dat6$V2A)]
-# table(dat6$country)
-# country_two_waves = intersect(country_w_wv6, country_w_wv5)
-# demo_v6 = c("country", "V131", "V132", "V133", "V134", "V135",
-#             "V136", "V139")
-# data_wv6 = dat6 %>%
-#   select(demo_v6)
+dat6 <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv6.rds")
+table(dat6$V2A)
+country_name
+country_code_6 = readxl::read_xlsx("country_code_6.xlsx", col_names = TRUE)
+colnames(country_code_6) = c("code", "country")
+country_vector_6 <- setNames(country_code_6$country, country_code_6$code)
+country_w_wv6 = intersect(country_name,country_vector_6)
+dat6$country = country_vector_6[as.character(dat6$V2A)]
+table(dat6$country)
+country_two_waves = intersect(country_w_wv6, country_w_wv5)
+demo_v6 = c("country", "V131", "V132", "V133", "V134", "V135",
+            "V136", "V139")
+data_wv6 = dat6 %>%
+  select(demo_v6)
 ########################how many unnormal entries are there
 # for (i in c(2:8)) {
 #   print(paste("No.", i, "var has the unnormal persentage of", 

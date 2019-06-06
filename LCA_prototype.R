@@ -1,8 +1,8 @@
-install.packages("poLCA")
+#install.packages("poLCA")
 library("poLCA")
 library("reshape2")
 
-nonnegtive = read.csv("nonzero_dataset.csv")
+nonnegtive = read.csv("nonnegative_dataset.csv")
 ### turn columns into factor type
 nonnegtive[,2:length(nonnegtive)] <- lapply(nonnegtive[,2:length(nonnegtive)], factor)
 colnames(nonnegtive) = c("country", "tax", "religion", "free_election", "state_aid",
@@ -11,18 +11,18 @@ colnames(nonnegtive) = c("country", "tax", "religion", "free_election", "state_a
 
 ############ Recode 10-scale to 3-level
 
-recode = function(df){
-  for (i in df){
-    cut(i,
-        breaks=c(0, 4, 5, 10),
-        labels=c())
-  }
-  return(df)
-}
-
-df_3level = recode(nonnegtive)
-
-#for (i in nonnegtive) print(summary(i))
+# recode = function(df){
+#   for (i in df){
+#     cut(i,
+#         breaks=c(0, 4, 5, 10),
+#         labels=c())
+#   }
+#   return(df)
+# }
+# 
+# df_3level = recode(nonnegtive)
+# 
+# #for (i in nonnegtive) print(summary(i))
 
 
 ############
