@@ -1,4 +1,6 @@
-library(tidyverse)
+library(dplyr)
+install.packages("dplyr")
+
 dat <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv5.rds")
 
 country_code = readxl::read_xlsx("country_code_5.xlsx", col_names = F)
