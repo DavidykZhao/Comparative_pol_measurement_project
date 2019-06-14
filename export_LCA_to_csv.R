@@ -25,19 +25,19 @@ f = with(US, cbind(tax, religion, free_election, state_aid, civil_rights, women)
 # producing the results table
 ## models with different number of groups without covariates:
 set.seed(01012)
-lc1<-poLCA(f, data=mydata, nclass=1, na.rm = FALSE, nrep=30, maxiter=3000) #Loglinear independence model.
-lc2<-poLCA(f, data=mydata, nclass=2, na.rm = FALSE, nrep=30, maxiter=3000)
-lc3<-poLCA(f, data=mydata, nclass=3, na.rm = FALSE, nrep=30, maxiter=3000)
-lc4<-poLCA(f, data=mydata, nclass=4, na.rm = FALSE, nrep=30, maxiter=3000) 
-lc5<-poLCA(f, data=mydata, nclass=5, na.rm = FALSE, nrep=30, maxiter=3000)
-lc6<-poLCA(f, data=mydata, nclass=6, na.rm = FALSE, nrep=30, maxiter=3000)
-lc7<-poLCA(f, data=mydata, nclass=7, na.rm = FALSE, nrep=30, maxiter=3000)
-lc8<-poLCA(f, data=mydata, nclass=8, na.rm = FALSE, nrep=30, maxiter=3000) 
-lc9<-poLCA(f, data=mydata, nclass=9, na.rm = FALSE, nrep=30, maxiter=3000)
-lc10<-poLCA(f, data=mydata, nclass=10, na.rm = FALSE, nrep=30, maxiter=3000)
-lc11<-poLCA(f, data=mydata, nclass=11, na.rm = FALSE, nrep=30, maxiter=3000)
-lc12<-poLCA(f, data=mydata, nclass=12, na.rm = FALSE, nrep=30, maxiter=3000)
-lc13<-poLCA(f, data=mydata, nclass=13, na.rm = FALSE, nrep=30, maxiter=3000)
+lc1<-poLCA(f, data=mydata, nclass=1, na.rm = FALSE, nrep=10, maxiter=3000) #Loglinear independence model.
+lc2<-poLCA(f, data=mydata, nclass=2, na.rm = FALSE, nrep=10, maxiter=3000)
+lc3<-poLCA(f, data=mydata, nclass=3, na.rm = FALSE, nrep=10, maxiter=3000)
+lc4<-poLCA(f, data=mydata, nclass=4, na.rm = FALSE, nrep=10, maxiter=3000) 
+lc5<-poLCA(f, data=mydata, nclass=5, na.rm = FALSE, nrep=10, maxiter=3000)
+lc6<-poLCA(f, data=mydata, nclass=6, na.rm = FALSE, nrep=10, maxiter=3000)
+lc7<-poLCA(f, data=mydata, nclass=7, na.rm = FALSE, nrep=10, maxiter=3000)
+lc8<-poLCA(f, data=mydata, nclass=8, na.rm = FALSE, nrep=10, maxiter=3000) 
+lc9<-poLCA(f, data=mydata, nclass=9, na.rm = FALSE, nrep=5, maxiter=1000)
+lc10<-poLCA(f, data=mydata, nclass=10, na.rm = FALSE, nrep=5, maxiter=2000)
+lc11<-poLCA(f, data=mydata, nclass=11, na.rm = FALSE, nrep=5, maxiter=2000)
+lc12<-poLCA(f, data=mydata, nclass=12, na.rm = FALSE, nrep=5, maxiter=2000)
+lc13<-poLCA(f, data=mydata, nclass=13, na.rm = FALSE, nrep=5, maxiter=2000)
 
 # generate dataframe with fit-values
 
@@ -126,7 +126,7 @@ results[9,6]<- (-2*lc9$llik) + lc9$npar * (1 + log(lc9$N))
 results[10,6]<- (-2*lc10$llik) + lc10$npar * (1 + log(lc10$N))
 results[11,6]<- (-2*lc11$llik) + lc11$npar * (1 + log(lc11$N))
 results[12,6]<- (-2*lc12$llik) + lc12$npar * (1 + log(lc12$N))
-results[12,6]<- (-2*lc13$llik) + lc13$npar * (1 + log(lc13$N))
+results[13,6]<- (-2*lc13$llik) + lc13$npar * (1 + log(lc13$N))
 
 
 results[2,7]<-lc2$Gsq
@@ -180,6 +180,8 @@ colnames(data_class)[7:9] <- c(paste(("posterior_C"), c(1:3), sep = ""))
 class_multinomial = LCA_best_model$probs
 
 # write csv out 
+#
+write.csv(results, "ALL_data_class.csv", row.names = FALSE)
 write.csv(class_multinomial, "US_multinomial.csv", row.names = FALSE)
 write.csv(data_class, "US_class_prob.csv", row.names = FALSE)
 
