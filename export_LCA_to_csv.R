@@ -1,4 +1,4 @@
-install.packages(c("ggplot2", "tibble", "tidyr", "purrr", "stringr"))
+#install.packages(c("ggplot2", "tibble", "tidyr", "purrr", "stringr"))
 library(tidyverse)
 library("poLCA")
 library(dplyr)

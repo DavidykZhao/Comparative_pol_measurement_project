@@ -13,10 +13,7 @@ dev.off()
 
 table(useful_wv5$V152)
 #### percentage within each country below 0 answers
-useful_wv5 %>%
-  filter(country == "Canada") %>%
-  select(V152) %>%
-  table()
+
 
 additional_wv5 = dat %>%
   filter(country %in% country_censored) %>%
