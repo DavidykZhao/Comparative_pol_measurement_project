@@ -25,7 +25,7 @@ raincloud_theme <- theme(
   axis.line.y = element_line(colour = "black", size = 0.5, linetype = "solid"))
 
 #mypalette = RColorBrewer::brewer.pal(26,"Spectral") not working
-getPalette = colorRampPalette(RColorBrewer::brewer.pal(8, "Set2"))(26)
+getPalette = colorRampPalette(RColorBrewer::brewer.pal(8, "Set2"))(22)
 
 rain_country_list = c("Brazil", "Japan", "Serbia", "Sweden", "United Kingdom",
             "United States")
@@ -42,6 +42,7 @@ sumld <- nonnegtive %>%
   group_by(country) %>% 
   summarise_all(funs(mean, median, lower = lb, upper = ub))
 sumld
+
 
 g <- 
   ggplot(data = nonnegtive, 
@@ -64,7 +65,7 @@ g <-
   raincloud_theme +
   theme(axis.title = element_text(size = 42),
         axis.text=element_text(size=42))
-
+g
 
 png(filename="tax.png", width = 7000, height = 2000)
 g
