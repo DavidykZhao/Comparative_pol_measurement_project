@@ -1,6 +1,7 @@
 #install.packages("poLCA")
 library("poLCA")
 library("reshape2")
+library(tidyverse)
 
 nonnegtive = read.csv("nonnegative_dataset.csv")
 ### turn columns into factor type
