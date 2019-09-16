@@ -1,3 +1,7 @@
+library(tidyverse)
+library("poLCA")
+nonnegtive = read.csv("nonnegative_dataset.csv")
+
 ###################TO generate csv output for each individual country
 
 # There is a function to generate model running results and write to csv
@@ -11,8 +15,7 @@ mydata = nonnegtive %>%
   dplyr::select(c("tax", "religion", "free_election", "state_aid",
                   "civil_rights", "women"))
 ## LCA formula, note that the first arg is your dataset. 
-f = with(US, cbind(tax, religion, free_election, state_aid, 
-                   civil_rights, women)~1) 
+f = cbind(tax, religion, free_election, state_aid, civil_rights, women)~1
 
 
 ## Some necessary funcitons
@@ -37,7 +40,7 @@ get_country_csv = function(country_name){
   
   for (i in 1:5){
     #model = replicate(5, NA)
-    model <- poLCA(f, data= US, nclass= i, na.rm = FALSE, nrep=15, maxiter=3500) 
+    model <- poLCA(f, data= country, nclass= i, na.rm = FALSE, nrep=15, maxiter=3500) 
     results[i,1] = paste("model", i)
     results[i,2]<- model$llik
     results[i,3]<- model$resid.df
@@ -46,16 +49,20 @@ get_country_csv = function(country_name){
     results[i,6]<- (-2* model$llik) + model$npar * (1 + log(model$N)) #caic
     results[i,7]<- model$Gsq
     results[i,8] <- round(((entropy(model$P) - mean(apply(model$posterior,1, entropy),na.rm = TRUE)) / entropy(model$P)),3)
+    cat("BIC for ", country_name, "are", model$bic)
     if (i == 1) {
       results[i, 8] = c("-")
     }
     results[i, 9:13] = c(round(model$P,3), rep("-", 5-i))
   }
+  cat("BIC for ", country_name, "are", results[, 4])
   write.csv(results, paste("csv_each_country/", country_name, ".csv", sep = ""), row.names = FALSE)
 }
 
 country_list = unique(nonnegtive$country)[-c(1,19)]
 #"Argentina",  "Sweden" NEED FURTHER WORK
+
+
 
 
 for (i in country_list){
