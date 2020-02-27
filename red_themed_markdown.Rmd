@@ -1,0 +1,177 @@
+---
+title: "Finding common contries across two wvs"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    code_folding: show
+---
+
+
+```{r setup, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=T,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+
+## Read the data and follow the codebook
+
+```{r read_data}
+dat <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv5.rds")
+dat6 <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv6.rds")
+polity = readxl::read_xls("polity_2017.xls")
+
+```
+
+### Read in the Polity6+ countries
+
+```{r polity6}
+polity_6up = polity %>%
+  filter(year == 2017 & democ >=6) %>%
+  dplyr::select(country, year, democ)
+
+country_name_polity = polity_6up$country 
+print(country_name_polity)
+```
+
+### The countries that are available in wv5, and their corresponding counts 
+(including those cases with 'don't knows' or other missing options).
+```{r,warning= F, message= F}
+country_code = readxl::read_xlsx("country_code_5.xlsx", col_names = F)
+colnames(country_code) = c("code", "country")
+country_vector <- setNames(country_code$country, country_code$code)
+country_w_wv5 = intersect(country_name_polity,country_vector)
+dat$country = country_vector[as.character(dat$V2A)]
+table(dat$country)
+```
+
+### The countries availabel in wv6 and corresponding counts
+```{r}
+country_code_6 = readxl::read_xlsx("country_code_6.xlsx", col_names = TRUE)
+# add (752, Sweden) and (276, Germany), (170, Columbia), (392, Japan), (410, South Korea),
+# (792, Turkey)
+append_df = data.frame('Code' = c(752, 276, 170, 392, 410, 792 ),
+                       'Label' = c('Sweden', 'Germany', 'Columbia', 'Japan', 'South Korea', 'Turkey'))
+country_code_6_complete = rbind(country_code_6, append_df) # combine the two list together
+colnames(country_code_6_complete) = c("code", "country")
+country_vector_6 <- setNames(country_code_6_complete$country, country_code_6_complete$code)
+country_w_wv6 = intersect(country_name_polity, country_vector_6)
+
+dat6$country = country_vector_6[as.character(dat6$V2)] # country_vector_6 is the look up table
+table(dat6$country)
+
+```
+
+### The union between wv5 and wv6 (with NA's!! meaning no code found from codebook)
+
+```{r}
+wv5_country_list = unique(dat$country)
+wv6_country_list = unique(dat6$country)
+union_wv5_wv6 = intersect(wv5_country_list ,wv6_country_list)
+union_wv5_wv6
+```
+
+There is NA at the index 7. Meaning that they appear within the dataset however did not appear in the codebook.
+
+## To solve the problem, digging into codebook and found code somewhere else...
+
+### Find out what do those NA mean in wv6
+
+```{r}
+dat6 %>%
+  filter(is.na(country)) -> NA_COUT
+
+table(NA_COUT$V2)
+```
+
+In an appendix (independent of any questions) within the codebook, we could find 528, 634 etc.. which match back to those NA countries. However, these countries does not appear in the country question. The codebook was inconsistent. We could manually add those countries in the next steps
+
+### Let's add in those NA countries for wv6
+```{r}
+append_df_6 = data.frame("code" = c(528, 634, 705, 724, 780 ),
+                         'country' = c('Netherlands', 'Qatar', 'Slovenia', 'Spain', 'Trinidad and Tobago'))
+country_code_6_complete = rbind(country_code_6_complete, append_df_6) # combine the two list together
+colnames(country_code_6_complete) = c("code", "country")
+country_vector_6 <- setNames(country_code_6_complete$country, country_code_6_complete$code)
+country_w_wv6 = intersect(country_name_polity, country_vector_6)
+
+dat6$country = country_vector_6[as.character(dat6$V2)] # country_vector_6 is the look up table
+print(length(unique(dat6$country)))
+table(dat6$country)
+```
+
+### Find out those NA's in wv5
+
+```{r}
+dat %>%
+  filter(is.na(country)) -> NA_COUT
+
+table(NA_COUT$V2)
+```
+
+### Let's manually match those NA countries... (Include countries which are below 6 points in polity score)
+```{r}
+append_df_5 = data.frame("code" = c(288, 320, 344, 356, 360, 364, 368, 380, 400, 458, 504, 604, 704, 710, 724, 756, 818 ),
+                         'country' = c('Ghana', 'Guatemala', 'Hong Kong', 'India', 'Indonesia', 
+                                       'Iran', 'Iraq', 'Italy', 'Jordan', 'Malaysia', 'Morocco',
+                                       'Peru', 'Viet Nam', 'South Africa',  'Spain', 'Switzerland', 'Egypt'))
+
+country_code_5_complete = rbind(country_code, append_df_5) # combine the two list together
+colnames(country_code_5_complete) = c("code", "country")
+country_vector_5 <- setNames(country_code_5_complete$country, country_code_5_complete$code)
+country_w_wv5 = intersect(country_name_polity, country_vector_5)
+
+dat$country = country_vector_5[as.character(dat$V2)] # country_vector_5 is the look up table
+print(length(unique(dat$country)))
+table(dat$country)
+
+
+```
+
+
+# Q1: Now we are able to find out the common countries in both wv5 and wv6 that are ABOVE polity 6 points.
+
+```{r}
+intersect(country_w_wv5, country_w_wv6)
+```
+
+## for wv5 only, we have these countries that are above polity 6 points
+
+```{r}
+country_w_wv5
+
+```
+
+## For wv6 only, we have these countries that are above polity 6 points
+```{r}
+country_w_wv6
+```
+
+
+# Q2  The countries we arbitrarily deleted before are:
+
+[1] "Trinidad and Tobago" "Colombia"            "Cyprus"             
+[4] "Moldova"             "Mali"                "Burkina Faso"       
+[7] "Zambia"              "Taiwan"              "New Zealand"
+[10] "Japan"
+
+
+
+

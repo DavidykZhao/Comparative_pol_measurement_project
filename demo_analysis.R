@@ -10,7 +10,7 @@ polity_6up = polity %>%
   filter(year == 2017 & democ >=6) %>%
   dplyr::select(country, year, democ)
 
-country_name = polity_6up$country # select the atomic column using $ rather than []
+country_name = polity_6up$country    # select the atomic column using $ rather than []
 intersect(country_name,country_vector)
 #### read in country_code
 country_code = readxl::read_xlsx("country_code_5.xlsx", col_names = F)
@@ -44,12 +44,12 @@ stack(attr(data_wv5$V152, 'labels'))
 apply(data_wv5[, -1], 2, show_bar)
 ################ Reading in wv6 data ######################
 dat6 <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv6.rds")
-table(dat6$V2A)
+table(dat6$V2)
 country_name
 country_code_6 = readxl::read_xlsx("country_code_6.xlsx", col_names = TRUE)
 colnames(country_code_6) = c("code", "country")
 country_vector_6 <- setNames(country_code_6$country, country_code_6$code)
-country_w_wv6 = intersect(country_name,country_vector_6)
+country_w_wv6 = intersect(country_name, country_vector_6)
 dat6$country = country_vector_6[as.character(dat6$V2A)]
 table(dat6$country)
 country_two_waves = intersect(country_w_wv6, country_w_wv5)

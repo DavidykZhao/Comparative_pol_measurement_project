@@ -1,0 +1,174 @@
+---
+title: "Countries according to different polity score threshold"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    code_folding: show
+---
+
+After talking with Dr. Kirby, we found that we used the Polity score at 2017 when we select countries. In this html file, I changed the polity score to 2005, to match the timepoint of wave5. Then I thresholded the polity score at three levels, >6, >7, and >8, yielding 43, 41, and 38 countries. The differences could be viewed below under the corresponding categories.
+
+
+```{r setup, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=T,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+
+## Read the data and follow the codebook
+
+```{r read_data}
+dat <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv5.rds")
+#dat6 <- readRDS("/Users/zhaoyikai/Desktop/Demo_MI_project/wv6.rds")
+polity = readxl::read_xls("polity_2017.xls")
+
+country_code = readxl::read_xlsx("country_code_5.xlsx", col_names = F)
+colnames(country_code) = c("code", "country")
+
+```
+
+### Read in the Polity6+ countries
+
+```{r polity6}
+polity_6up_2005 = polity %>%
+  filter(year == 2005 & democ >=6) %>%
+  dplyr::select(country, year, democ)
+
+polity_6up_2017 = polity %>%
+  filter(year == 2017 & democ >=6) %>%
+  dplyr::select(country, year, democ)
+
+# manually patch west and east Germany here
+polity_6up_2005 = rbind(polity_6up_2005, data.frame("country" = c('West Germany', 'East Germany'), "year" = c(2005, 2005), democ = c(8.5, 8.5)
+))
+
+
+country_name_polity = polity_6up_2005$country 
+print(country_name_polity)
+```
+
+# When we use a polity score of > 6
+What are the countries that were in Polity score that were > 6 in 2017 but not in 2005 (meaning have been improved)?
+
+```{r }
+setdiff(polity_6up_2017$country, polity_6up_2005$country)
+```
+
+
+
+
+
+
+### Let's manually match those NA countries... (Including countries which are below 6 points in polity score) to get a full list of countries! 
+```{r append5}
+append_df_5 = data.frame("code" = c(288, 320, 344, 356, 360, 364, 368, 380, 400, 458, 504, 604, 704, 710, 724, 756, 818, 900, 901),
+                         'country' = c('Ghana', 'Guatemala', 'Hong Kong', 'India', 'Indonesia', 
+                                       'Iran', 'Iraq', 'Italy', 'Jordan', 'Malaysia', 'Morocco',
+                                       'Peru', 'Viet Nam', 'South Africa', 'Spain', 'Switzerland', 'Egypt', 'West Germany', 'East Germany' ))
+```
+
+
+```{r}
+country_code_5_complete = rbind(country_code, append_df_5) # combine the two list together
+colnames(country_code_5_complete) = c("code", "country")
+country_vector_5 <- setNames(country_code_5_complete$country, country_code_5_complete$code)
+country_w_wv5_polity6 = intersect(country_name_polity, country_vector_5)
+
+#dat$country = country_vector_5[as.character(dat$V2A)] # country_vector_5 is the look-up table
+print(length(unique(country_w_wv5_polity6)))
+#table(dat$country)
+country_w_wv5_polity6
+```
+
+
+# When we use a polity score of > 7
+
+### Read in the Polity7+ countries
+
+```{r polity7}
+polity_7up_2005 = polity %>%
+  filter(year == 2005 & democ >=7) %>%
+  dplyr::select(country, year, democ)
+
+# manually patch west and east Germany here
+polity_7up_2005 = rbind(polity_7up_2005, data.frame("country" = c('West Germany', 'East Germany'), "year" = c(2005, 2005), democ = c(8.5, 8.5)
+))
+
+
+country_name_polity_7 = polity_7up_2005$country 
+```
+
+
+
+
+```{r }
+
+country_code_5_complete = rbind(country_code, append_df_5) # combine the two list together
+colnames(country_code_5_complete) = c("code", "country")
+country_vector_5 <- setNames(country_code_5_complete$country, country_code_5_complete$code)
+country_w_wv5_polity7 = intersect(country_name_polity_7, country_vector_5)
+
+#dat$country = country_vector_5[as.character(dat$V2A)] # country_vector_5 is the look up table
+print(length(unique(country_w_wv5_polity7)))
+country_w_wv5_polity7
+```
+
+# When we use a polity score of > 8
+
+### Read in the Polity8+ countries
+```{r polity8}
+polity_8up_2005 = polity %>%
+  filter(year == 2005 & democ >=8) %>%
+  dplyr::select(country, year, democ)
+
+# manually patch west and east Germany here
+polity_8up_2005 = rbind(polity_8up_2005, data.frame("country" = c('West Germany', 'East Germany'), "year" = c(2005, 2005), democ = c(8.5, 8.5)
+))
+
+
+country_name_polity_8 = polity_8up_2005$country 
+```
+
+```{r dependson=country_name_polity_8}
+
+country_code_5_complete = rbind(country_code, append_df_5) # combine the two list together
+colnames(country_code_5_complete) = c("code", "country")
+country_vector_5 <- setNames(country_code_5_complete$country, country_code_5_complete$code)
+country_w_wv5_polity8 = intersect(country_name_polity_8, country_vector_5)
+
+#dat$country = country_vector_5[as.character(dat$V2A)] # country_vector_5 is the look up table
+print(length(unique(country_w_wv5_polity8)))
+country_w_wv5_polity8
+```
+
+# What is missing from polity6up to polity7up?
+
+```{r}
+setdiff(country_w_wv5_polity6, country_w_wv5_polity7)
+```
+
+# What is missing from polity7up to polity8up?
+```{r}
+setdiff(country_w_wv5_polity7, country_w_wv5_polity8)
+
+```
+
+
