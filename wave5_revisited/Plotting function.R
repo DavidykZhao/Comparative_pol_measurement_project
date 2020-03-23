@@ -30,11 +30,14 @@ profile_plot = function(data_ls){
     religion = rep(NA, n_class),
     free_election = rep(NA, n_class),
     state_aid = rep(NA, n_class),
-    Army = rep(NA, n_class), # add Army var
+    army = rep(NA, n_class), # add Army var
     civil_rights = rep(NA, n_class),
+    prospering = rep(NA, n_class) , 
+    criminals = rep(NA, n_class), 
+    referendums = rep(NA, n_class),
     women = rep(NA, n_class))
   
-  for (i in 1:7) {
+  for (i in 1:10) {
     if (length(probs[[i]][1,]) < 10) {
       probs[[i]] = cbind(probs[[i]], matrix(0, nrow = nrow(probs[[i]]), ncol = 10 - ncol(probs[[i]]))) 
     } 
@@ -46,7 +49,7 @@ profile_plot = function(data_ls){
   colnames(profile_tb)[1] = "class"
   profile_long = reshape::melt(profile_tb, id.vars = "class")
   
-  write.csv(profile_long, "pooled_output.csv", row.names = FALSE)
+  #write.csv(profile_long, "pooled_output.csv", row.names = FALSE)
   p = ggplot(profile_long, aes(x = variable, y = value, group = class, color = class)) +
     geom_point(size = 2.25)+
     geom_line(size = 1.00) +
@@ -59,10 +62,11 @@ profile_plot = function(data_ls){
     theme(plot.title = element_text(hjust = 0.5, size = 14))+
     scale_color_discrete(name = "Class & probability", labels = paste(paste("Class", 1:length(LCA_best_model$P), sep = "_"), ":", 
                                           round(LCA_best_model$P, 3)))+
-    labs(title = paste("The profile plot of", country_name))+
+    labs(title = paste("The LCA plot of", country_name))+
     theme(legend.title = element_text(size = 12))+
     theme(
-      plot.title = element_text(hjust = 0)
+      plot.title = element_text(hjust = 0),
+      panel.border = element_blank()
     )+
     theme(legend.position = "bottom")
 
